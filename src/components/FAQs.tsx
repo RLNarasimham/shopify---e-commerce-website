@@ -77,7 +77,7 @@ const FAQs: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-[60vh] max-w-screen-xl mx-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div className="flex flex-col min-h-[60vh] max-w-screen-xl md:my-10 mx-auto bg-gray-50 justify-center items-center dark:bg-gray-900 transition-colors duration-200">
       <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 dark:text-gray-100 mb-6">
         Frequently Asked Questions
       </h2>

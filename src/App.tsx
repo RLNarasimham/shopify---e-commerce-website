@@ -37,8 +37,8 @@ function AppContent() {
   }, [dispatch]);
 
   return (
-    <div className="flex flex-col justify-between min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 w-full sm:w-full lg:w-full">
-      <div className="max-w-7xl mx-auto px-0 sm:px-0 lg:px-0">
+    <div className="flex flex-col justify-between min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 xl:w-full w-fit">
+      <div className="px-0 sm:px-0 lg:px-0">
         <Header />
         <Cart />
         <Routes>
