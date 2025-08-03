@@ -12,7 +12,7 @@
 // const Footer: React.FC = () => {
 //   return (
 //     <footer className="bg-gray-900 dark:bg-gray-950 text-white">
-//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+//       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
 //         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
 //           {/* Company Info */}
 //           <div className="space-y-4">
@@ -79,7 +79,7 @@
 //                   to="/contact"
 //                   className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
 //                 >
-//                   Contact Us
+//                   Contact
 //                 </Link>
 //               </li>
 //               <li>
@@ -134,7 +134,9 @@
 
 //           {/* Contact Info */}
 //           <div className="space-y-4">
-//             <h4 className="text-lg font-semibold">Contact Us</h4>
+//             <h4 className="text-lg font-semibold">
+//               Get in touch with us <span className="text-blue-400">@</span>
+//             </h4>
 //             <div className="space-y-3 text-sm">
 //               <div className="flex items-center space-x-3">
 //                 <Mail className="h-4 w-4 text-gray-400 dark:text-gray-500" />
@@ -187,11 +189,12 @@ const Footer: React.FC = () => {
               Your trusted online shopping destination for quality products at
               unbeatable prices.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4" aria-label="Social media links">
               <a
                 href="https://www.facebook.com/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Shopify Facebook"
               >
                 <Facebook className="h-5 w-5 text-blue-400 hover:text-blue-600 transition-colors" />
               </a>
@@ -199,6 +202,7 @@ const Footer: React.FC = () => {
                 href="https://twitter.com/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Shopify Twitter"
               >
                 <Twitter className="h-5 w-5 text-blue-400 hover:text-blue-600 transition-colors" />
               </a>
@@ -206,6 +210,7 @@ const Footer: React.FC = () => {
                 href="https://www.instagram.com/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Shopify Instagram"
               >
                 <Instagram className="h-5 w-5 text-blue-400 hover:text-blue-600 transition-colors" />
               </a>
@@ -219,7 +224,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/"
-                  className="text-gray-400 dark:hover:text-white dark:text-gray-500 hover:text-white transition-colors"
+                  className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
                 >
                   Home
                 </Link>
@@ -227,7 +232,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/products"
-                  className="text-gray-400 dark:hover:text-white dark:text-gray-500 hover:text-white transition-colors"
+                  className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
                 >
                   All Products
                 </Link>
@@ -235,7 +240,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/about"
-                  className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+                  className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
                 >
                   About Us
                 </Link>
@@ -243,7 +248,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/contact"
-                  className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+                  className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
                 >
                   Contact
                 </Link>
@@ -251,7 +256,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/faq"
-                  className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+                  className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
                 >
                   FAQ
                 </Link>
@@ -266,7 +271,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/category/electronics"
-                  className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+                  className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
                 >
                   Electronics
                 </Link>
@@ -274,7 +279,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/category/men's-clothing"
-                  className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+                  className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
                 >
                   Men's Clothing
                 </Link>
@@ -282,7 +287,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/category/women's-clothing"
-                  className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+                  className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
                 >
                   Women's Clothing
                 </Link>
@@ -290,7 +295,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link
                   to="/category/jewelery"
-                  className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+                  className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
                 >
                   Jewelery
                 </Link>
@@ -324,6 +329,10 @@ const Footer: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+        {/* Footer bottom (optional copyright) */}
+        <div className="mt-10 text-center text-xs text-gray-400 dark:text-gray-600">
+          &copy; {new Date().getFullYear()} Shopify. All rights reserved.
         </div>
       </div>
     </footer>
