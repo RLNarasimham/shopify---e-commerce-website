@@ -166,11 +166,17 @@ export const fetchProducts = createAsyncThunk<
   { rejectValue: string }
 >("products/fetchAll", async (_, { rejectWithValue }) => {
   try {
+    if (!API_BASE_URL) {
+      throw new Error("API base URL is not defined in environment variables");
+    }
+
     const res = await fetch(`${API_BASE_URL}/products`);
+
     if (!res.ok) {
-      const errorText = await res.text(); // capture backend error message if any
+      const errorText = await res.text();
       return rejectWithValue(`Server error: ${errorText || res.status}`);
     }
+
     const data = await res.json();
     return data;
   } catch (error: any) {
