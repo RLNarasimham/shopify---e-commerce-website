@@ -5,6 +5,7 @@ import { store } from "./store";
 import Header from "./components/Header";
 import { themeProvider } from "./context/themeContext";
 import ContactUs from "./components/ContactUs";
+import { fetchCategories } from "./store/slices/categoriesSlice";
 import HomePage from "./components/HomePage";
 import ProductList from "./components/ProductList";
 import ProductFilter from "./components/ProductFilter";
@@ -34,6 +35,7 @@ function AppContent() {
 
   React.useEffect(() => {
     dispatch(fetchProducts());
+    dispatch(fetchCategories());
   }, [dispatch]);
 
   return (
