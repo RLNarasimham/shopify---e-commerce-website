@@ -113,6 +113,7 @@ import {
   createSelector,
 } from "@reduxjs/toolkit";
 import { RootState } from "../index";
+import { Product } from "../../types";
 
 // Extend the product type as needed for your app
 interface Product {
@@ -141,18 +142,41 @@ const initialState: ProductsState = {
   error: null,
 };
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://fakestoreapi.com";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+if (!API_BASE_URL) {
+  throw new Error("Missing API_BASE_URL in environment variables");
+}
+
+// import.meta.env.VITE_API_BASE_URL || "https://fakestoreapi.com";
 
 // --- Async thunk to fetch products ---
-export const fetchProducts = createAsyncThunk<Product[]>(
-  "products/fetchAll",
-  async () => {
+// export const fetchProducts = createAsyncThunk<Product[]>(
+//   "products/fetchAll",
+//   async () => {
+//     const res = await fetch(`${API_BASE_URL}/products`);
+//     if (!res.ok) throw new Error("Failed to fetch products");
+//     return await res.json();
+//   }
+// );
+
+export const fetchProducts = createAsyncThunk<
+  Product[],
+  void,
+  { rejectValue: string }
+>("products/fetchAll", async (_, { rejectWithValue }) => {
+  try {
     const res = await fetch(`${API_BASE_URL}/products`);
-    if (!res.ok) throw new Error("Failed to fetch products");
-    return await res.json();
+    if (!res.ok) {
+      const errorText = await res.text(); // capture backend error message if any
+      return rejectWithValue(`Server error: ${errorText || res.status}`);
+    }
+    const data = await res.json();
+    return data;
+  } catch (error: any) {
+    return rejectWithValue(error.message || "Network error");
   }
-);
+});
 
 const productsSlice = createSlice({
   name: "products",
