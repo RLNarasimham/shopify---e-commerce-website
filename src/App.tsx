@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import Header from "./components/Header";
-import { ThemeProvider } from "./context/themeContext";
+import { themeProvider } from "./context/themeContext";
 import ContactUs from "./components/ContactUs";
 import HomePage from "./components/HomePage";
 import ProductList from "./components/ProductList";
@@ -112,7 +112,7 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
+    <themeProvider>
       <QueryClientProvider client={queryClient}>
         <Provider store={store}>
           <Router>
@@ -120,7 +120,7 @@ function App() {
           </Router>
         </Provider>
       </QueryClientProvider>
-    </ThemeProvider>
+    </themeProvider>
   );
 }
 
