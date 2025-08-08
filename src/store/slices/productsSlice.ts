@@ -116,19 +116,19 @@ import { RootState } from "../index";
 import { Product } from "../../types";
 
 // Extend the product type as needed for your app
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-  description: string;
-  image: string;
-  category: string;
-  rating: {
-    rate: number;
-    count: number;
-  };
-  isFavourite?: boolean;
-}
+// interface Product {
+//   id: number;
+//   title: string;
+//   price: number;
+//   description: string;
+//   image: string;
+//   category: string;
+//   rating: {
+//     rate: number;
+//     count: number;
+//   };
+//   isFavourite?: boolean;
+// }
 
 interface ProductsState {
   all: Product[];
