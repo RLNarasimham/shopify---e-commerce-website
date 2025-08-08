@@ -142,7 +142,7 @@ const initialState: ProductsState = {
   error: null,
 };
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = "https://fakestoreapi.com";
 
 if (!API_BASE_URL) {
   throw new Error("Missing API_BASE_URL in environment variables");
