@@ -142,11 +142,11 @@ const initialState: ProductsState = {
   error: null,
 };
 
-const API_BASE_URL = "https://fakestoreapi.com";
+const FAKESTORE_API_URL = "https://fakestoreapi.com/products";
 
-if (!API_BASE_URL) {
-  throw new Error("Missing API_BASE_URL in environment variables");
-}
+// if (!API_BASE_URL) {
+//   throw new Error("Missing API_BASE_URL in environment variables");
+// }
 
 // import.meta.env.VITE_API_BASE_URL || "https://fakestoreapi.com";
 
@@ -166,11 +166,7 @@ export const fetchProducts = createAsyncThunk<
   { rejectValue: string }
 >("products/fetchAll", async (_, { rejectWithValue }) => {
   try {
-    if (!API_BASE_URL) {
-      throw new Error("API base URL is not defined in environment variables");
-    }
-
-    const res = await fetch(`${API_BASE_URL}/products`);
+    const res = await fetch(FAKESTORE_API_URL);
 
     if (!res.ok) {
       const errorText = await res.text();
