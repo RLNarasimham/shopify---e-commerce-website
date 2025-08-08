@@ -48,7 +48,7 @@ const themeContext = createContext<ThemeContextProps>({
   toggleTheme: () => {},
 });
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+export const themeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   // Check system preference for first render
