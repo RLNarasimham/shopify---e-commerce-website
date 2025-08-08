@@ -17,4 +17,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  preview: {
+    allowedHosts: ['shopify-e-commerce-website-4rax.onrender.com']
+  }
 });
