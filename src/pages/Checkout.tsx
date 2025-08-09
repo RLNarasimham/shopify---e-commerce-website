@@ -483,6 +483,7 @@ const Checkout: React.FC = () => {
 
   // Store token in component state instead of localStorage
   // Store token in component state instead of localStorage
+  // Store token in component state instead of localStorage
   const [authToken, setAuthToken] = useState("your_token_here"); // Replace with your token management
 
   const onSubmit = async (e: FormEvent) => {
@@ -535,7 +536,7 @@ const Checkout: React.FC = () => {
 
       // 1) Create order with cart items
       const orderResponse = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/payment/create-order`,
+        `${import.meta.env.VITE_BACKEND_URL}/payment/create-order`,
         {
           ...requestConfig,
           body: JSON.stringify({
@@ -586,7 +587,7 @@ const Checkout: React.FC = () => {
           try {
             // Verify payment
             const verifyResponse = await fetch(
-              `${import.meta.env.VITE_API_BASE_URL}/payment/verify`,
+              `${import.meta.env.VITE_BACKEND_URL}/payment/verify`,
               {
                 ...requestConfig,
                 body: JSON.stringify({
