@@ -93,6 +93,9 @@ const FAKE_STORE_API_URL = "https://fakestoreapi.com";
 const BACKEND_API_URL =
   import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
+// Razorpay configuration
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "";
+
 export class ApiError extends Error {
   status?: number;
   data?: unknown;
@@ -325,95 +328,278 @@ export const productApi = {
 };
 
 // Payment and Order API using your backend
-export const paymentApi = {
-  createOrder: async (order: Order): Promise<any> => {
-    try {
-      console.log("💳 Creating order for payment...");
-      const payload = {
-        userId: 1, // Replace with actual user ID from authentication
-        date: new Date().toISOString(),
-        items: order.items.map((item) => ({
-          productId: item.id,
-          title: item.title,
-          price: item.price,
-          quantity: item.quantity,
-        })),
-        totalAmount: order.total,
-        currency: "INR", // Add currency for Razorpay
-      };
+// export const paymentApi = {
+//   createOrder: async (order: Order): Promise<any> => {
+//     try {
+//       console.log("💳 Creating order for payment...");
+//       const payload = {
+//         userId: 1, // Replace with actual user ID from authentication
+//         date: new Date().toISOString(),
+//         items: order.items.map((item) => ({
+//           productId: item.id,
+//           title: item.title,
+//           price: item.price,
+//           quantity: item.quantity,
+//         })),
+//         totalAmount: order.total,
+//         currency: "INR", // Add currency for Razorpay
+//       };
 
-      const { data } = await backendApi.post("/api/orders", payload);
+//       const { data } = await backendApi.post("/api/orders", payload);
+//       console.log("✅ Order created successfully:", data);
+//       return data;
+//     } catch (error) {
+//       console.error("Error creating order:", error);
+//       throw error;
+//     }
+//   },
+
+//   initiatePayment: async (orderData: any): Promise<any> => {
+//     try {
+//       console.log("💰 Initiating Razorpay payment...");
+//       const { data } = await backendApi.post("/api/payment/create", orderData);
+//       console.log("✅ Payment initiated:", data);
+//       return data;
+//     } catch (error) {
+//       console.error("Error initiating payment:", error);
+//       throw error;
+//     }
+//   },
+
+//   verifyPayment: async (paymentData: any): Promise<any> => {
+//     try {
+//       console.log("🔐 Verifying payment...");
+//       const { data } = await backendApi.post(
+//         "/api/payment/verify",
+//         paymentData
+//       );
+//       console.log("✅ Payment verified:", data);
+//       return data;
+//     } catch (error) {
+//       console.error("Error verifying payment:", error);
+//       throw error;
+//     }
+//   },
+
+//   // Test backend connection
+//   testConnection: async (): Promise<boolean> => {
+//     try {
+//       await backendApi.get("/api/health");
+//       console.log("✅ Backend API connection successful");
+//       return true;
+//     } catch (error) {
+//       console.error("❌ Backend API connection failed:", error);
+//       return false;
+//     }
+//   },
+// };
+
+// // Combined health check for both APIs
+// export const testAllConnections = async () => {
+//   console.log("🔄 Testing all API connections...");
+
+//   const fakeStoreStatus = await productApi.testConnection();
+//   const backendStatus = await paymentApi.testConnection();
+
+//   console.log("📊 Connection Status:");
+//   console.log(
+//     `  • Fake Store API: ${fakeStoreStatus ? "✅ Online" : "❌ Offline"}`
+//   );
+//   console.log(`  • Backend API: ${backendStatus ? "✅ Online" : "❌ Offline"}`);
+
+//   return {
+//     fakeStore: fakeStoreStatus,
+//     backend: backendStatus,
+//     overall: fakeStoreStatus && backendStatus,
+//   };
+// };
+
+// // Legacy support - keeping the old createOrder function for backward compatibility
+// export const createOrder = paymentApi.createOrder;
+
+// // Export the APIs
+// export { fakeStoreApi, backendApi };
+// export default fakeStoreApi;
+
+// Payment API (using your backend)
+export const paymentApi = {
+  // Test backend connection
+  testConnection: async (): Promise<boolean> => {
+    try {
+      await backendApi.get("/api/payment/health");
+      return true;
+    } catch (error) {
+      console.error("Backend connection test failed:", error);
+      return false;
+    }
+  },
+
+  // Create Razorpay order
+  createOrder: async (orderData: {
+    amount: number;
+    currency?: string;
+    userId?: string;
+    items?: any[];
+  }): Promise<any> => {
+    try {
+      console.log("🛒 Creating payment order:", orderData);
+
+      const { data } = await backendApi.post("/api/payment/create-order", {
+        amount: orderData.amount,
+        currency: orderData.currency || "INR",
+        userId: orderData.userId || "guest",
+        items: orderData.items || [],
+      });
+
+      if (!data.success) {
+        throw new Error(data.error || "Order creation failed");
+      }
+
       console.log("✅ Order created successfully:", data);
       return data;
     } catch (error) {
-      console.error("Error creating order:", error);
+      console.error("❌ Error creating order:", error);
       throw error;
     }
   },
 
-  initiatePayment: async (orderData: any): Promise<any> => {
+  // Verify payment
+  verifyPayment: async (paymentData: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }): Promise<any> => {
     try {
-      console.log("💰 Initiating Razorpay payment...");
-      const { data } = await backendApi.post("/api/payment/create", orderData);
-      console.log("✅ Payment initiated:", data);
-      return data;
-    } catch (error) {
-      console.error("Error initiating payment:", error);
-      throw error;
-    }
-  },
+      console.log("🔐 Verifying payment:", paymentData);
 
-  verifyPayment: async (paymentData: any): Promise<any> => {
-    try {
-      console.log("🔐 Verifying payment...");
       const { data } = await backendApi.post(
         "/api/payment/verify",
         paymentData
       );
-      console.log("✅ Payment verified:", data);
+
+      if (!data.success) {
+        throw new Error(data.error || "Payment verification failed");
+      }
+
+      console.log("✅ Payment verified successfully:", data);
       return data;
     } catch (error) {
-      console.error("Error verifying payment:", error);
+      console.error("❌ Error verifying payment:", error);
       throw error;
     }
   },
 
-  // Test backend connection
-  testConnection: async (): Promise<boolean> => {
+  // Get payment status
+  getPaymentStatus: async (paymentId: string): Promise<any> => {
     try {
-      await backendApi.get("/api/health");
-      console.log("✅ Backend API connection successful");
-      return true;
+      const { data } = await backendApi.get(
+        `/api/payment/payment/${paymentId}`
+      );
+      return data;
     } catch (error) {
-      console.error("❌ Backend API connection failed:", error);
-      return false;
+      console.error("Error fetching payment status:", error);
+      throw error;
+    }
+  },
+
+  // Get order status
+  getOrderStatus: async (orderId: string): Promise<any> => {
+    try {
+      const { data } = await backendApi.get(`/api/payment/order/${orderId}`);
+      return data;
+    } catch (error) {
+      console.error("Error fetching order status:", error);
+      throw error;
     }
   },
 };
 
-// Combined health check for both APIs
-export const testAllConnections = async () => {
-  console.log("🔄 Testing all API connections...");
+// Razorpay integration helper
+export const initiateRazorpayPayment = (
+  orderData: any,
+  onSuccess: (response: any) => void,
+  onError: (error: any) => void
+) => {
+  // Check if Razorpay is loaded
+  if (typeof (window as any).Razorpay === "undefined") {
+    onError(new Error("Razorpay SDK not loaded. Please refresh the page."));
+    return;
+  }
 
-  const fakeStoreStatus = await productApi.testConnection();
-  const backendStatus = await paymentApi.testConnection();
+  const options = {
+    key: RAZORPAY_KEY_ID || orderData.razorpayKeyId,
+    amount: orderData.amount,
+    currency: orderData.currency || "INR",
+    order_id: orderData.orderId,
+    name: "Your Store Name",
+    description: "Purchase from Your Store",
+    image: "/logo.png", // Your logo URL
+    handler: async (response: any) => {
+      try {
+        // Verify payment on backend
+        const verificationResult = await paymentApi.verifyPayment({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+        });
 
-  console.log("📊 Connection Status:");
-  console.log(
-    `  • Fake Store API: ${fakeStoreStatus ? "✅ Online" : "❌ Offline"}`
-  );
-  console.log(`  • Backend API: ${backendStatus ? "✅ Online" : "❌ Offline"}`);
-
-  return {
-    fakeStore: fakeStoreStatus,
-    backend: backendStatus,
-    overall: fakeStoreStatus && backendStatus,
+        onSuccess({
+          ...response,
+          verification: verificationResult,
+        });
+      } catch (error) {
+        onError(error);
+      }
+    },
+    prefill: {
+      name: "Customer Name",
+      email: "customer@example.com",
+      contact: "9999999999",
+    },
+    notes: {
+      address: "Customer Address",
+    },
+    theme: {
+      color: "#3399cc",
+    },
+    modal: {
+      ondismiss: () => {
+        onError(new Error("Payment cancelled by user"));
+      },
+    },
   };
+
+  const razorpayInstance = new (window as any).Razorpay(options);
+  razorpayInstance.open();
 };
 
-// Legacy support - keeping the old createOrder function for backward compatibility
+// Complete payment flow
+export const processPayment = async (
+  cartItems: any[],
+  totalAmount: number,
+  onSuccess: (response: any) => void,
+  onError: (error: any) => void
+) => {
+  try {
+    console.log("💳 Starting payment process...");
+
+    // Step 1: Create order on backend
+    const orderResponse = await paymentApi.createOrder({
+      amount: totalAmount,
+      currency: "INR",
+      userId: "user123", // Replace with actual user ID
+      items: cartItems,
+    });
+
+    // Step 2: Initialize Razorpay payment
+    initiateRazorpayPayment(orderResponse, onSuccess, onError);
+  } catch (error) {
+    console.error("❌ Payment process failed:", error);
+    onError(error);
+  }
+};
+
+// Legacy support
 export const createOrder = paymentApi.createOrder;
 
-// Export the APIs
-export { fakeStoreApi, backendApi };
 export default fakeStoreApi;
