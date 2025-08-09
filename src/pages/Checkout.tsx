@@ -482,6 +482,7 @@ const Checkout: React.FC = () => {
   // };
 
   // Store token in component state instead of localStorage
+  // Store token in component state instead of localStorage
   const [authToken, setAuthToken] = useState("your_token_here"); // Replace with your token management
 
   const onSubmit = async (e: FormEvent) => {
@@ -524,21 +525,25 @@ const Checkout: React.FC = () => {
     };
 
     try {
-      const movieId = selectedMovieId ?? cartItems[0]?.id;
-      if (!movieId) {
-        setError("Missing movie selection.");
-        setLoading(false);
-        return;
-      }
+      // Prepare order items for ecommerce checkout
+      const orderItems = cartItems.map((item) => ({
+        productId: item.id,
+        productName: item.name || item.title,
+        quantity: item.quantity,
+        price: item.price,
+      }));
 
-      // 1) Create order with fetch instead of axios
+      // 1) Create order with cart items
       const orderResponse = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/payment/create-order`,
         {
           ...requestConfig,
           body: JSON.stringify({
             amount: Math.round(total),
-            movieId,
+            currency: "INR",
+            items: orderItems,
+            shipping: shipping,
+            receipt: `order_${Date.now()}`,
           }),
         }
       );
@@ -558,13 +563,16 @@ const Checkout: React.FC = () => {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: orderData.amount,
         currency: orderData.currency || "INR",
-        name: "My Store",
-        description: "Order Payment",
+        name: "Your Store",
+        description: "Product Purchase",
         order_id: orderData.id,
-        notes: { movieId: String(movieId) },
+        notes: {
+          orderId: orderData.id,
+          itemCount: String(cartItems.length),
+        },
         prefill: {
-          name: shipping.name || "User",
-          email: shipping.email || "user@example.com",
+          name: shipping.name || "Customer",
+          email: shipping.email || "customer@example.com",
           contact: shipping.phone || "",
         },
         theme: { color: "#3399cc" },
@@ -596,23 +604,28 @@ const Checkout: React.FC = () => {
             const verifyResult = await verifyResponse.json();
 
             if (verifyResult?.success) {
-              // Record payment
+              // Record payment with order details
               const recordResponse = await fetch(
                 `${import.meta.env.VITE_API_BASE_URL}/payment`,
                 {
                   ...requestConfig,
                   body: JSON.stringify({
-                    movieId,
+                    orderId: orderData.id,
                     paymentId: response.razorpay_payment_id,
                     amount: Math.round(total),
+                    items: orderItems,
+                    shipping: shipping,
+                    status: "completed",
                   }),
                 }
               );
 
               if (recordResponse.ok) {
+                // Clear cart and navigate to success page
+                // setCartItems([]); // Uncomment if you have this function
                 navigate("/success");
               } else {
-                setError("Payment recorded but navigation failed.");
+                setError("Payment recorded but order processing failed.");
               }
             } else {
               setError("Payment verification failed.");
