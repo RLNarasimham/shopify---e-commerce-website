@@ -327,6 +327,50 @@ const Checkout: React.FC = () => {
     setShipping({ ...shipping, [e.target.name]: e.target.value });
   };
 
+  // const onSubmit = async (e: FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError("");
+
+  //   if (cartItems.length === 0) {
+  //     setError("Your cart is empty.");
+  //     setLoading(false);
+  //     return;
+  //   }
+  //   if (total <= 0 || isNaN(total)) {
+  //     setError("Invalid total amount.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const { data: orderData } = await axios.post(
+  //       `${import.meta.env.VITE_API_BASE_URL}/payment/create-order`,
+  //       { amount: Math.round(total) }
+  //     );
+
+  //     const options: RazorpayOptions = {
+  //       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+  //       amount: orderData.amount,
+  //       currency: orderData.currency,
+  //       name: "My Store",
+  //       description: "Order Payment",
+  //       order_id: orderData.id,
+  //       handler: () => {
+  //         navigate("/success");
+  //       },
+  //       prefill: { name: shipping.name || "User", email: "user@example.com" },
+  //       theme: { color: "#3399cc" },
+  //     };
+
+  //     new window.Razorpay(options).open();
+  //   } catch {
+  //     setError("Payment failed. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -344,29 +388,95 @@ const Checkout: React.FC = () => {
     }
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Please log in to continue.");
+        setLoading(false);
+        return;
+      }
+
+      // pick/derive the movieId you need to charge for
+      const movieId = selectedMovieId ?? cartItems[0]?.id;
+      if (!movieId) {
+        setError("Missing movie selection.");
+        setLoading(false);
+        return;
+      }
+
+      // 1) Create order (server multiplies by 100 and returns amount in paise)
       const { data: orderData } = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/payment/create-order`,
-        { amount: Math.round(total) }
+        { amount: Math.round(total), movieId },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      if (!window.Razorpay) {
+        setError("Payment SDK not loaded. Please refresh and try again.");
+        setLoading(false);
+        return;
+      }
 
       const options: RazorpayOptions = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: orderData.amount,
-        currency: orderData.currency,
+        amount: orderData.amount, // paise (from server)
+        currency: orderData.currency, // "INR"
         name: "My Store",
         description: "Order Payment",
-        order_id: orderData.id,
-        handler: () => {
-          navigate("/success");
-        },
+        order_id: orderData.id, // Razorpay order id from server
+        notes: { movieId: String(movieId) },
         prefill: { name: shipping.name || "User", email: "user@example.com" },
         theme: { color: "#3399cc" },
+
+        // 2) Verify payment on your server
+        handler: async (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            const verifyRes = await axios.post(
+              `${import.meta.env.VITE_API_BASE_URL}/payment/verify`,
+              {
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+              },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (verifyRes.data?.success) {
+              // 3) Record payment
+              await axios.post(
+                `${import.meta.env.VITE_API_BASE_URL}/payment`,
+                {
+                  movieId,
+                  paymentId: response.razorpay_payment_id,
+                  amount: Math.round(total), // store rupee value (your choice)
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              navigate("/success");
+            } else {
+              setError("Payment verification failed.");
+            }
+          } catch (err) {
+            setError("Payment verification failed.");
+          } finally {
+            setLoading(false);
+          }
+        },
+
+        modal: {
+          ondismiss: () => {
+            setLoading(false);
+            setError("Payment cancelled.");
+          },
+        },
       };
 
       new window.Razorpay(options).open();
     } catch {
       setError("Payment failed. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
