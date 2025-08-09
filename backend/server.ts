@@ -29,6 +29,12 @@ import dotenv from "dotenv";
 import crypto from "crypto";
 import paymentRoutes from "./routes/paymentRoutes";
 
+// Allow only your frontend domain in production, plus localhost in dev
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "", // e.g., https://shopify-frontend.onrender.com
+  "http://localhost:5173", // Vite dev server
+];
+
 dotenv.config();
 
 // --- Helper: require env at startup (fixes TS2345 and fails fast if missing)
@@ -45,9 +51,24 @@ const RAZORPAY_KEY_SECRET = requireEnv("RAZORPAY_KEY_SECRET");
 const app = express();
 
 // ✅ CORS config
+// app.use(
+//   cors({
+//     origin: process.env.FRONTEND_URL || "*", // Replace with domain for production
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   })
+// );
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*", // Replace with domain for production
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("CORS: Origin not allowed"));
+    },
     methods: ["GET", "POST"],
     credentials: true,
   })
