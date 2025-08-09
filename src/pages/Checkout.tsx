@@ -371,6 +371,126 @@ const Checkout: React.FC = () => {
   //   }
   // };
 
+  // const onSubmit = async (e: FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError("");
+
+  //   if (cartItems.length === 0) {
+  //     setError("Your cart is empty.");
+  //     setLoading(false);
+  //     return;
+  //   }
+  //   if (total <= 0 || isNaN(total)) {
+  //     setError("Invalid total amount.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       setError("Please log in to continue.");
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     // pick/derive the movieId you need to charge for
+  //     const movieId = selectedMovieId ?? cartItems[0]?.id;
+  //     if (!movieId) {
+  //       setError("Missing movie selection.");
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     // 1) Create order (server multiplies by 100 and returns amount in paise)
+  //     const { data: orderData } = await axios.post(
+  //       `${import.meta.env.VITE_API_BASE_URL}/payment/create-order`,
+  //       { amount: Math.round(total), movieId },
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+
+  //     if (!window.Razorpay) {
+  //       setError("Payment SDK not loaded. Please refresh and try again.");
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     const options: RazorpayOptions = {
+  //       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+  //       amount: orderData.amount, // paise (from server)
+  //       currency: orderData.currency, // "INR"
+  //       name: "My Store",
+  //       description: "Order Payment",
+  //       order_id: orderData.id, // Razorpay order id from server
+  //       notes: { movieId: String(movieId) },
+  //       prefill: { name: shipping.name || "User", email: "user@example.com" },
+  //       theme: { color: "#3399cc" },
+
+  //       // 2) Verify payment on your server
+  //       handler: async (response: {
+  //         razorpay_payment_id: string;
+  //         razorpay_order_id: string;
+  //         razorpay_signature: string;
+  //       }) => {
+  //         try {
+  //           const verifyRes = await axios.post(
+  //             `${import.meta.env.VITE_API_BASE_URL}/payment/verify`,
+  //             {
+  //               razorpay_payment_id: response.razorpay_payment_id,
+  //               razorpay_order_id: response.razorpay_order_id,
+  //               razorpay_signature: response.razorpay_signature,
+  //             },
+  //             { headers: { Authorization: `Bearer ${token}` } }
+  //           );
+
+  //           if (verifyRes.data?.success) {
+  //             // 3) Record payment
+  //             await axios.post(
+  //               `${import.meta.env.VITE_API_BASE_URL}/payment`,
+  //               {
+  //                 movieId,
+  //                 paymentId: response.razorpay_payment_id,
+  //                 amount: Math.round(total), // store rupee value (your choice)
+  //               },
+  //               { headers: { Authorization: `Bearer ${token}` } }
+  //             );
+  //             navigate("/success");
+  //           } else {
+  //             setError("Payment verification failed.");
+  //           }
+  //         } catch (err) {
+  //           setError("Payment verification failed.");
+  //         } finally {
+  //           setLoading(false);
+  //         }
+  //       },
+
+  //       modal: {
+  //         ondismiss: () => {
+  //           setLoading(false);
+  //           setError("Payment cancelled.");
+  //         },
+  //       },
+  //     };
+
+  //     new window.Razorpay(options).open();
+  //   } catch {
+  //     setError("Payment failed. Please try again.");
+  //     setLoading(false);
+  //   }
+  // };
+
+  import axios from "axios";
+
+  const getToken = () =>
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("access_token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("authToken") ||
+    null;
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -387,15 +507,13 @@ const Checkout: React.FC = () => {
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("Please log in to continue.");
-        setLoading(false);
-        return;
-      }
+    const token = getToken(); // ✅ try common keys; may be cookie-only
+    const axiosCfg = {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      withCredentials: true, // ✅ let HTTP-only cookie sessions work
+    } as const;
 
-      // pick/derive the movieId you need to charge for
+    try {
       const movieId = selectedMovieId ?? cartItems[0]?.id;
       if (!movieId) {
         setError("Missing movie selection.");
@@ -403,11 +521,11 @@ const Checkout: React.FC = () => {
         return;
       }
 
-      // 1) Create order (server multiplies by 100 and returns amount in paise)
+      // 1) Create order
       const { data: orderData } = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/payment/create-order`,
         { amount: Math.round(total), movieId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        axiosCfg
       );
 
       if (!window.Razorpay) {
@@ -418,16 +536,16 @@ const Checkout: React.FC = () => {
 
       const options: RazorpayOptions = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: orderData.amount, // paise (from server)
-        currency: orderData.currency, // "INR"
+        amount: orderData.amount,
+        currency: orderData.currency,
         name: "My Store",
         description: "Order Payment",
-        order_id: orderData.id, // Razorpay order id from server
+        order_id: orderData.id,
         notes: { movieId: String(movieId) },
         prefill: { name: shipping.name || "User", email: "user@example.com" },
         theme: { color: "#3399cc" },
 
-        // 2) Verify payment on your server
+        // 2) Verify + 3) Record
         handler: async (response: {
           razorpay_payment_id: string;
           razorpay_order_id: string;
@@ -441,26 +559,29 @@ const Checkout: React.FC = () => {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_signature: response.razorpay_signature,
               },
-              { headers: { Authorization: `Bearer ${token}` } }
+              axiosCfg
             );
 
             if (verifyRes.data?.success) {
-              // 3) Record payment
               await axios.post(
                 `${import.meta.env.VITE_API_BASE_URL}/payment`,
                 {
                   movieId,
                   paymentId: response.razorpay_payment_id,
-                  amount: Math.round(total), // store rupee value (your choice)
+                  amount: Math.round(total),
                 },
-                { headers: { Authorization: `Bearer ${token}` } }
+                axiosCfg
               );
               navigate("/success");
             } else {
               setError("Payment verification failed.");
             }
-          } catch (err) {
-            setError("Payment verification failed.");
+          } catch (err: unknown) {
+            if (axios.isAxiosError(err) && err.response?.status === 401) {
+              setError("Session expired. Please log in again.");
+            } else {
+              setError("Payment verification failed.");
+            }
           } finally {
             setLoading(false);
           }
@@ -475,8 +596,13 @@ const Checkout: React.FC = () => {
       };
 
       new window.Razorpay(options).open();
-    } catch {
-      setError("Payment failed. Please try again.");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        // Only tell them to log in if the server actually says so
+        setError("Please log in to continue.");
+      } else {
+        setError("Payment failed. Please try again.");
+      }
       setLoading(false);
     }
   };
