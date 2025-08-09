@@ -481,13 +481,8 @@ const Checkout: React.FC = () => {
   //   }
   // };
 
-  const getToken = () =>
-    localStorage.getItem("token") ||
-    localStorage.getItem("authToken") ||
-    localStorage.getItem("access_token") ||
-    sessionStorage.getItem("token") ||
-    sessionStorage.getItem("authToken") ||
-    null;
+  // Store token in component state instead of localStorage
+  const [authToken, setAuthToken] = useState("your_token_here"); // Replace with your token management
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -499,17 +494,34 @@ const Checkout: React.FC = () => {
       setLoading(false);
       return;
     }
+
     if (total <= 0 || isNaN(total)) {
       setError("Invalid total amount.");
       setLoading(false);
       return;
     }
 
-    const token = getToken(); // ✅ try common keys; may be cookie-only
-    const axiosCfg = {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      withCredentials: true, // ✅ let HTTP-only cookie sessions work
-    } as const;
+    // Check if Razorpay is loaded
+    if (!window.Razorpay) {
+      setError("Payment system not loaded. Please refresh and try again.");
+      setLoading(false);
+      return;
+    }
+
+    // Use state-based token instead of localStorage
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (authToken) {
+      headers.Authorization = `Bearer ${authToken}`;
+    }
+
+    const requestConfig = {
+      method: "POST",
+      headers,
+      credentials: "include" as RequestCredentials, // For cookies
+    };
 
     try {
       const movieId = selectedMovieId ?? cartItems[0]?.id;
@@ -519,66 +531,100 @@ const Checkout: React.FC = () => {
         return;
       }
 
-      // 1) Create order
-      const { data: orderData } = await axios.post(
+      // 1) Create order with fetch instead of axios
+      const orderResponse = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/payment/create-order`,
-        { amount: Math.round(total), movieId },
-        axiosCfg
+        {
+          ...requestConfig,
+          body: JSON.stringify({
+            amount: Math.round(total),
+            movieId,
+          }),
+        }
       );
 
-      if (!window.Razorpay) {
-        setError("Payment SDK not loaded. Please refresh and try again.");
-        setLoading(false);
-        return;
+      if (!orderResponse.ok) {
+        if (orderResponse.status === 401) {
+          setError("Please log in to continue.");
+          setLoading(false);
+          return;
+        }
+        throw new Error(`HTTP ${orderResponse.status}`);
       }
+
+      const orderData = await orderResponse.json();
 
       const options: RazorpayOptions = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: orderData.amount,
-        currency: orderData.currency,
+        currency: orderData.currency || "INR",
         name: "My Store",
         description: "Order Payment",
         order_id: orderData.id,
         notes: { movieId: String(movieId) },
-        prefill: { name: shipping.name || "User", email: "user@example.com" },
+        prefill: {
+          name: shipping.name || "User",
+          email: shipping.email || "user@example.com",
+          contact: shipping.phone || "",
+        },
         theme: { color: "#3399cc" },
 
-        // 2) Verify + 3) Record
+        // 2) Payment success handler
         handler: async (response: {
           razorpay_payment_id: string;
           razorpay_order_id: string;
           razorpay_signature: string;
         }) => {
           try {
-            const verifyRes = await axios.post(
+            // Verify payment
+            const verifyResponse = await fetch(
               `${import.meta.env.VITE_API_BASE_URL}/payment/verify`,
               {
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-              },
-              axiosCfg
+                ...requestConfig,
+                body: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature,
+                }),
+              }
             );
 
-            if (verifyRes.data?.success) {
-              await axios.post(
+            if (!verifyResponse.ok) {
+              throw new Error(`Verification failed: ${verifyResponse.status}`);
+            }
+
+            const verifyResult = await verifyResponse.json();
+
+            if (verifyResult?.success) {
+              // Record payment
+              const recordResponse = await fetch(
                 `${import.meta.env.VITE_API_BASE_URL}/payment`,
                 {
-                  movieId,
-                  paymentId: response.razorpay_payment_id,
-                  amount: Math.round(total),
-                },
-                axiosCfg
+                  ...requestConfig,
+                  body: JSON.stringify({
+                    movieId,
+                    paymentId: response.razorpay_payment_id,
+                    amount: Math.round(total),
+                  }),
+                }
               );
-              navigate("/success");
+
+              if (recordResponse.ok) {
+                navigate("/success");
+              } else {
+                setError("Payment recorded but navigation failed.");
+              }
             } else {
               setError("Payment verification failed.");
             }
           } catch (err: unknown) {
-            if (axios.isAxiosError(err) && err.response?.status === 401) {
+            console.error("Payment verification error:", err);
+            if (err instanceof Error && err.message.includes("401")) {
               setError("Session expired. Please log in again.");
             } else {
-              setError("Payment verification failed.");
+              setError(
+                "Payment verification failed. Please contact support if amount was deducted."
+              );
             }
           } finally {
             setLoading(false);
@@ -593,10 +639,13 @@ const Checkout: React.FC = () => {
         },
       };
 
-      new window.Razorpay(options).open();
+      // Open Razorpay payment modal
+      const razorpayInstance = new window.Razorpay(options);
+      razorpayInstance.open();
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.status === 401) {
-        // Only tell them to log in if the server actually says so
+      console.error("Payment initiation error:", err);
+
+      if (err instanceof Error && err.message.includes("401")) {
         setError("Please log in to continue.");
       } else {
         setError("Payment failed. Please try again.");
