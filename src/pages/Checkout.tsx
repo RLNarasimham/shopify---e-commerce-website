@@ -481,8 +481,6 @@ const Checkout: React.FC = () => {
   //   }
   // };
 
-  import axios from "axios";
-
   const getToken = () =>
     localStorage.getItem("token") ||
     localStorage.getItem("authToken") ||
