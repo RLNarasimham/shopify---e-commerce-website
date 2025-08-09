@@ -104,7 +104,6 @@ app.post("/api/payment/create-order", async (req, res) => {
       amount,
       currency,
       receipt: receipt ?? `rcpt_${Date.now()}`,
-      notes,
     });
     res.json({ success: true, order });
   } catch (e) {
