@@ -146,8 +146,15 @@ app.post("/api/payment/verify", (req, res) => {
       };
 
     // ✅ TS-safe: RAZORPAY_KEY_SECRET is a guaranteed string
+    // const expected = crypto
+    //   .createHmac("sha256", RAZORPAY_KEY_SECRET)
+    //   .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+    //   .digest("hex");
+
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret) throw new Error("Missing RAZORPAY_KEY_SECRET");
     const expected = crypto
-      .createHmac("sha256", RAZORPAY_KEY_SECRET)
+      .createHmac("sha256", secret)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
