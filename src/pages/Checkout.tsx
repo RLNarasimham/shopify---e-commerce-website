@@ -1,4 +1,3 @@
-
 import React, { useState, FormEvent } from "react";
 import { useAppSelector } from "../store";
 import { useNavigate } from "react-router-dom";
@@ -113,7 +112,7 @@ const Checkout: React.FC = () => {
       "Content-Type": "application/json",
     };
 
-    
+    const authToken = localStorage.getItem("authToken");
     if (authToken) {
       headers.Authorization = `Bearer ${authToken}`;
     }
