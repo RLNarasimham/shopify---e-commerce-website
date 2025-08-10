@@ -1,3 +1,4 @@
+
 import React, { useState, FormEvent } from "react";
 import { useAppSelector } from "../store";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +12,7 @@ const CGST_PERCENT = 5;
 const SGST_PERCENT = 5;
 const UTGST_PERCENT = 0;
 
+// Razorpay types
 interface RazorpayPrefill {
   name?: string;
   email?: string;
@@ -63,6 +65,7 @@ const Checkout: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Calculate charges
   const subtotal = cartItems.reduce(
     (sum, i) => sum + i.product.price * i.quantity,
     0
@@ -98,12 +101,14 @@ const Checkout: React.FC = () => {
       return;
     }
 
+    // Check if Razorpay is loaded
     if (!window.Razorpay) {
       setError("Payment system not loaded. Please refresh and try again.");
       setLoading(false);
       return;
     }
 
+    // Use state-based token instead of localStorage
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -115,10 +120,11 @@ const Checkout: React.FC = () => {
     const requestConfig = {
       method: "POST",
       headers,
-      credentials: "include" as RequestCredentials,
+      credentials: "include" as RequestCredentials, // For cookies
     };
 
     try {
+      // Prepare order items for ecommerce checkout
       const orderItems = cartItems.map((item) => ({
         productId: item.id,
         productName: item.name || item.title,
@@ -126,6 +132,7 @@ const Checkout: React.FC = () => {
         price: item.price,
       }));
 
+      // ✅ Debug: Log all the data being sent
       const requestPayload = {
         amount: Math.round(total),
         currency: "INR",
@@ -145,6 +152,7 @@ const Checkout: React.FC = () => {
         JSON.stringify(requestPayload, null, 2)
       );
 
+      // 1) Create order with cart items
       const orderResponse = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/payment/create-order`,
         {
@@ -159,10 +167,12 @@ const Checkout: React.FC = () => {
         Object.fromEntries(orderResponse.headers.entries())
       );
 
+      // ✅ Get response text first to debug what's being returned
       const responseText = await orderResponse.text();
       console.log("📡 Raw response:", responseText);
 
       if (!orderResponse.ok) {
+        // ✅ Try to parse error response
         let errorData;
         try {
           errorData = JSON.parse(responseText);
@@ -184,9 +194,11 @@ const Checkout: React.FC = () => {
         return;
       }
 
+      // ✅ Parse the successful response
       const orderData = JSON.parse(responseText);
       console.log("✅ Order created successfully:", orderData);
 
+      // ✅ Debug: Check the structure of orderData
       console.log("🔍 Order data structure:");
       console.log("- orderData.id:", orderData.id);
       console.log("- orderData.orderId:", orderData.orderId);
@@ -212,6 +224,7 @@ const Checkout: React.FC = () => {
         },
         theme: { color: "#3399cc" },
 
+        // 2) Payment success handler
         handler: async (response: {
           razorpay_payment_id: string;
           razorpay_order_id: string;
@@ -220,8 +233,9 @@ const Checkout: React.FC = () => {
           try {
             console.log("💰 Payment successful, verifying...", response);
 
+            // Verify payment
             const verifyResponse = await fetch(
-              `${import.meta.env.VITE_BACKEND_URL}/api/payment/verify`,
+              `${import.meta.env.VITE_BACKEND_URL}/api/payment/verify`, // ✅ Fixed URL
               {
                 ...requestConfig,
                 body: JSON.stringify({
@@ -240,6 +254,7 @@ const Checkout: React.FC = () => {
             console.log("🔐 Verification result:", verifyResult);
 
             if (verifyResult?.success) {
+              // Record payment with order details (if you have this endpoint)
               if (import.meta.env.VITE_API_BASE_URL) {
                 const recordResponse = await fetch(
                   `${import.meta.env.VITE_API_BASE_URL}/payment`,
@@ -266,6 +281,7 @@ const Checkout: React.FC = () => {
                 }
               }
 
+              // Clear cart and navigate to success page
               console.log("✅ Payment complete, navigating to success page");
               navigate("/success");
             } else {
@@ -295,6 +311,7 @@ const Checkout: React.FC = () => {
 
       console.log("🚀 Opening Razorpay with options:", options);
 
+      // Open Razorpay payment modal
       const razorpayInstance = new window.Razorpay(options);
       razorpayInstance.open();
     } catch (err: unknown) {
@@ -335,6 +352,7 @@ const Checkout: React.FC = () => {
             )
           )}
 
+          {/* Delivery Method */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Delivery Method
@@ -350,6 +368,7 @@ const Checkout: React.FC = () => {
             </select>
           </div>
 
+          {/* Order Items */}
           <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-8">
             Order Summary
           </h3>
@@ -364,6 +383,7 @@ const Checkout: React.FC = () => {
             ))}
           </ul>
 
+          {/* Charges Breakdown */}
           <div className="space-y-1 text-sm text-gray-800 dark:text-gray-200 mt-4">
             <div className="flex justify-between">
               <span>Subtotal:</span>
