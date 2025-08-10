@@ -1,8 +1,5 @@
-// src/store/index.ts
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
-
-// Import reducers
 import cartReducer from "./slices/cartSlice";
 import favoritesReducer from "./slices/favoritesSlice";
 import uiReducer from "./slices/uiSlice";

@@ -29,7 +29,7 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 const queryClient = new QueryClient();
 
 function AppContent() {
-  useTheme(); // Initialize theme
+  useTheme();
 
   const dispatch = useAppDispatch();
 
@@ -80,7 +80,6 @@ function AppContent() {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/faq" element={<FAQs />} />
-          {/* ✅ Step 2: Add the orders route */}
           <Route
             path="/orders"
             element={

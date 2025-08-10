@@ -1,99 +1,10 @@
-// import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
-// import { Product, Order } from "../types";
-
-// export class ApiError extends Error {
-//   status?: number;
-//   data?: unknown;
-
-//   constructor(message: string, status?: number, data?: unknown) {
-//     super(message);
-//     this.name = "ApiError";
-//     this.status = status;
-//     this.data = data;
-//   }
-// }
-
-// const API_BASE_URL = import.meta.env.VITE_API_URL || "https://fakestoreapi.com";
-
-// const api: AxiosInstance = axios.create({
-//   baseURL: API_BASE_URL,
-//   timeout: 10_000,
-// });
-
-// // ——— Request interceptor (attach token) ———
-// api.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("authToken");
-//   if (token && config.headers) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
-
-// // ——— Response interceptor (normalize errors) ———
-// api.interceptors.response.use(
-//   (response: AxiosResponse) => response,
-//   (error: AxiosError<unknown>) => {
-//     // If server responded with something
-//     if (error.response) {
-//       // Try to pull a message field if it exists
-//       const data = error.response.data;
-//       const message =
-//         typeof data === "object" && data !== null && "message" in data
-//           ? (data as { message: string }).message
-//           : error.message;
-
-//       throw new ApiError(message, error.response.status, data);
-//     }
-//     // Network error or no response
-//     throw new ApiError(error.message);
-//   }
-// );
-
-// export const productApi = {
-//   getAllProducts: async (): Promise<Product[]> => {
-//     const { data } = await api.get<Product[]>("/products");
-//     return data;
-//   },
-
-//   getProductById: async (id: number): Promise<Product> => {
-//     const { data } = await api.get<Product>(`/products/${id}`);
-//     return data;
-//   },
-
-//   getCategories: async (): Promise<string[]> => {
-//     const { data } = await api.get<string[]>("/products/categories");
-//     return data;
-//   },
-
-//   getProductsByCategory: async (category: string): Promise<Product[]> => {
-//     const { data } = await api.get<Product[]>(`/products/category/${category}`);
-//     return data;
-//   },
-// };
-
-// export const createOrder = (order: Order) => {
-//   const payload = {
-//     userId: 1, // you can generate or pull from your auth user
-//     date: new Date().toISOString(),
-//     products: order.items.map((i) => ({
-//       productId: i.id,
-//       quantity: i.quantity,
-//     })),
-//   };
-//   return api.post("/carts", payload);
-// };
-
-// export default api;
-
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { Product, Order } from "../types";
 
-// Use this env var for global backend access!
 const FAKE_STORE_API_URL = "https://fakestoreapi.com";
 const BACKEND_API_URL =
   import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-// Razorpay configuration
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "";
 
 export class ApiError extends Error {
@@ -108,7 +19,6 @@ export class ApiError extends Error {
   }
 }
 
-// API instance for Fake Store API (products)
 const fakeStoreApi: AxiosInstance = axios.create({
   baseURL: FAKE_STORE_API_URL,
   timeout: 15000,
@@ -120,23 +30,13 @@ const fakeStoreApi: AxiosInstance = axios.create({
 
 const backendApi: AxiosInstance = axios.create({
   baseURL: BACKEND_API_URL,
-  timeout: 15000, // 10 seconds
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
 
-// Attach JWT if present
-// api.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("authToken");
-//   if (token && config.headers) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
-
-// Error interceptor for Fake Store API (no auth needed)
 fakeStoreApi.interceptors.response.use(
   (response: AxiosResponse) => {
     console.log("✅ Fake Store API Success:", response.config.url);
@@ -167,23 +67,6 @@ fakeStoreApi.interceptors.response.use(
   }
 );
 
-// Normalize errors
-// api.interceptors.response.use(
-//   (response: AxiosResponse) => response,
-//   (error: AxiosError<unknown>) => {
-//     if (error.response) {
-//       const data = error.response.data;
-//       const message =
-//         typeof data === "object" && data !== null && "message" in data
-//           ? (data as { message: string }).message
-//           : error.message;
-//       throw new ApiError(message, error.response.status, data);
-//     }
-//     throw new ApiError(error.message);
-//   }
-// );
-
-// Auth interceptor for your backend API
 backendApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
   if (token && config.headers) {
@@ -192,7 +75,6 @@ backendApi.interceptors.request.use((config) => {
   return config;
 });
 
-// Error interceptor for your backend API
 backendApi.interceptors.response.use(
   (response: AxiosResponse) => {
     console.log("✅ Backend API Success:", response.config.url);
@@ -225,43 +107,6 @@ backendApi.interceptors.response.use(
     );
   }
 );
-
-// export const productApi = {
-//   getAllProducts: async (): Promise<Product[]> => {
-//     const { data } = await api.get<Product[]>("/products");
-//     return data;
-//   },
-
-//   getProductById: async (id: number): Promise<Product> => {
-//     const { data } = await api.get<Product>(`/products/${id}`);
-//     return data;
-//   },
-
-//   getCategories: async (): Promise<string[]> => {
-//     const { data } = await api.get<string[]>("/products/categories");
-//     return data;
-//   },
-
-//   getProductsByCategory: async (category: string): Promise<Product[]> => {
-//     const { data } = await api.get<Product[]>(`/products/category/${category}`);
-//     return data;
-//   },
-// };
-
-// // Order creation (adapt payload for your backend!)
-// export const createOrder = (order: Order) => {
-//   const payload = {
-//     userId: 1, // You can use actual user id from auth here if needed
-//     date: new Date().toISOString(),
-//     products: order.items.map((i) => ({
-//       productId: i.id,
-//       quantity: i.quantity,
-//     })),
-//   };
-//   return api.post("/carts", payload);
-// };
-
-// export default api;
 
 export const productApi = {
   getAllProducts: async (): Promise<Product[]> => {
@@ -314,7 +159,6 @@ export const productApi = {
     }
   },
 
-  // Utility method to test connection
   testConnection: async (): Promise<boolean> => {
     try {
       await fakeStoreApi.get("/products?limit=1");
@@ -327,103 +171,7 @@ export const productApi = {
   },
 };
 
-// Payment and Order API using your backend
-// export const paymentApi = {
-//   createOrder: async (order: Order): Promise<any> => {
-//     try {
-//       console.log("💳 Creating order for payment...");
-//       const payload = {
-//         userId: 1, // Replace with actual user ID from authentication
-//         date: new Date().toISOString(),
-//         items: order.items.map((item) => ({
-//           productId: item.id,
-//           title: item.title,
-//           price: item.price,
-//           quantity: item.quantity,
-//         })),
-//         totalAmount: order.total,
-//         currency: "INR", // Add currency for Razorpay
-//       };
-
-//       const { data } = await backendApi.post("/api/orders", payload);
-//       console.log("✅ Order created successfully:", data);
-//       return data;
-//     } catch (error) {
-//       console.error("Error creating order:", error);
-//       throw error;
-//     }
-//   },
-
-//   initiatePayment: async (orderData: any): Promise<any> => {
-//     try {
-//       console.log("💰 Initiating Razorpay payment...");
-//       const { data } = await backendApi.post("/api/payment/create", orderData);
-//       console.log("✅ Payment initiated:", data);
-//       return data;
-//     } catch (error) {
-//       console.error("Error initiating payment:", error);
-//       throw error;
-//     }
-//   },
-
-//   verifyPayment: async (paymentData: any): Promise<any> => {
-//     try {
-//       console.log("🔐 Verifying payment...");
-//       const { data } = await backendApi.post(
-//         "/api/payment/verify",
-//         paymentData
-//       );
-//       console.log("✅ Payment verified:", data);
-//       return data;
-//     } catch (error) {
-//       console.error("Error verifying payment:", error);
-//       throw error;
-//     }
-//   },
-
-//   // Test backend connection
-//   testConnection: async (): Promise<boolean> => {
-//     try {
-//       await backendApi.get("/api/health");
-//       console.log("✅ Backend API connection successful");
-//       return true;
-//     } catch (error) {
-//       console.error("❌ Backend API connection failed:", error);
-//       return false;
-//     }
-//   },
-// };
-
-// // Combined health check for both APIs
-// export const testAllConnections = async () => {
-//   console.log("🔄 Testing all API connections...");
-
-//   const fakeStoreStatus = await productApi.testConnection();
-//   const backendStatus = await paymentApi.testConnection();
-
-//   console.log("📊 Connection Status:");
-//   console.log(
-//     `  • Fake Store API: ${fakeStoreStatus ? "✅ Online" : "❌ Offline"}`
-//   );
-//   console.log(`  • Backend API: ${backendStatus ? "✅ Online" : "❌ Offline"}`);
-
-//   return {
-//     fakeStore: fakeStoreStatus,
-//     backend: backendStatus,
-//     overall: fakeStoreStatus && backendStatus,
-//   };
-// };
-
-// // Legacy support - keeping the old createOrder function for backward compatibility
-// export const createOrder = paymentApi.createOrder;
-
-// // Export the APIs
-// export { fakeStoreApi, backendApi };
-// export default fakeStoreApi;
-
-// Payment API (using your backend)
 export const paymentApi = {
-  // Test backend connection
   testConnection: async (): Promise<boolean> => {
     try {
       await backendApi.get("/api/payment/health");
@@ -434,7 +182,6 @@ export const paymentApi = {
     }
   },
 
-  // Create Razorpay order
   createOrder: async (orderData: {
     amount: number;
     currency?: string;
@@ -463,7 +210,6 @@ export const paymentApi = {
     }
   },
 
-  // Verify payment
   verifyPayment: async (paymentData: {
     razorpay_order_id: string;
     razorpay_payment_id: string;
@@ -489,7 +235,6 @@ export const paymentApi = {
     }
   },
 
-  // Get payment status
   getPaymentStatus: async (paymentId: string): Promise<any> => {
     try {
       const { data } = await backendApi.get(
@@ -502,7 +247,6 @@ export const paymentApi = {
     }
   },
 
-  // Get order status
   getOrderStatus: async (orderId: string): Promise<any> => {
     try {
       const { data } = await backendApi.get(`/api/payment/order/${orderId}`);
@@ -514,13 +258,11 @@ export const paymentApi = {
   },
 };
 
-// Razorpay integration helper
 export const initiateRazorpayPayment = (
   orderData: any,
   onSuccess: (response: any) => void,
   onError: (error: any) => void
 ) => {
-  // Check if Razorpay is loaded
   if (typeof (window as any).Razorpay === "undefined") {
     onError(new Error("Razorpay SDK not loaded. Please refresh the page."));
     return;
@@ -533,10 +275,9 @@ export const initiateRazorpayPayment = (
     order_id: orderData.orderId,
     name: "Your Store Name",
     description: "Purchase from Your Store",
-    image: "/logo.png", // Your logo URL
+    image: "/logo.png",
     handler: async (response: any) => {
       try {
-        // Verify payment on backend
         const verificationResult = await paymentApi.verifyPayment({
           razorpay_order_id: response.razorpay_order_id,
           razorpay_payment_id: response.razorpay_payment_id,
@@ -573,7 +314,6 @@ export const initiateRazorpayPayment = (
   razorpayInstance.open();
 };
 
-// Complete payment flow
 export const processPayment = async (
   cartItems: any[],
   totalAmount: number,
@@ -583,15 +323,13 @@ export const processPayment = async (
   try {
     console.log("💳 Starting payment process...");
 
-    // Step 1: Create order on backend
     const orderResponse = await paymentApi.createOrder({
       amount: totalAmount,
       currency: "INR",
-      userId: "user123", // Replace with actual user ID
+      userId: "user123",
       items: cartItems,
     });
 
-    // Step 2: Initialize Razorpay payment
     initiateRazorpayPayment(orderResponse, onSuccess, onError);
   } catch (error) {
     console.error("❌ Payment process failed:", error);
@@ -599,7 +337,6 @@ export const processPayment = async (
   }
 };
 
-// Legacy support
 export const createOrder = paymentApi.createOrder;
 
 export default fakeStoreApi;

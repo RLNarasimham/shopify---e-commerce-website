@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Order } from "../../types";
 import { createOrder } from "../../services/api";
-import { clearCart } from "./cartSlice"; // action from your cart
+import { clearCart } from "./cartSlice";
 import axios from "axios";
 
 export const submitOrder = createAsyncThunk<
@@ -14,10 +14,8 @@ export const submitOrder = createAsyncThunk<
     dispatch(clearCart());
     return response.data;
   } catch (error: unknown) {
-    // 2) Narrow unknown → AxiosError or native Error
     let message = "An unknown error occurred";
     if (axios.isAxiosError(error)) {
-      // If your API sends { message: string } in the body:
       const data = error.response?.data as { message?: string } | undefined;
       message = data?.message || error.message;
     } else if (error instanceof Error) {
@@ -54,7 +52,6 @@ const orderSlice = createSlice({
       })
       .addCase(submitOrder.rejected, (state, action) => {
         state.loading = false;
-        // payload is typed string | undefined
         state.error =
           action.payload ?? action.error.message ?? "Order submission failed";
       });
