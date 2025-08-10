@@ -104,7 +104,14 @@ function AppContent() {
             }
           />
           <Route path="/success" element={<Success />} />
-          <Route path="/top-picks" element={<TopPicksPage />} />
+          <Route
+            path="/top-picks"
+            element={
+              <main className="flex-1">
+                <TopPicksPage />
+              </main>
+            }
+          />
         </Routes>
         <Footer />
       </div>

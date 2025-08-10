@@ -319,7 +319,8 @@ const Checkout: React.FC = () => {
   const sgst = (subtotal * SGST_PERCENT) / 100;
   const utgst = (subtotal * UTGST_PERCENT) / 100;
   const deliveryCharge = shipping.deliveryMode === "paid" ? DELIVERY_CHARGE : 0;
-  const total = subtotal - discount + cgst + sgst + utgst + deliveryCharge;
+  const total =
+    (subtotal - discount + cgst + sgst + utgst + deliveryCharge) * 100;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -739,7 +740,7 @@ const Checkout: React.FC = () => {
 
       // 1) Create order with cart items
       const orderResponse = await fetch(
-        "http://localhost:5000/api/payment/create-order",
+        `${import.meta.env.VITE_BACKEND_URL}/api/payment/create-order`,
         {
           ...requestConfig,
           body: JSON.stringify(requestPayload),
@@ -820,7 +821,7 @@ const Checkout: React.FC = () => {
 
             // Verify payment
             const verifyResponse = await fetch(
-              "http://localhost:5000/api/payment/verify", // ✅ Fixed URL
+              `${import.meta.env.VITE_BACKEND_URL}/api/payment/verify`, // ✅ Fixed URL
               {
                 ...requestConfig,
                 body: JSON.stringify({
@@ -1000,7 +1001,7 @@ const Checkout: React.FC = () => {
             </div>
             <div className="flex justify-between font-bold pt-2 border-t dark:border-gray-700">
               <span>Total:</span>
-              <span>₹{total.toFixed(2)}</span>
+              <span>₹{total.toFixed(2) / 100}</span>
             </div>
           </div>
 

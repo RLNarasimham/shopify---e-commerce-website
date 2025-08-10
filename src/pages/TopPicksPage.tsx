@@ -57,7 +57,7 @@ const TopPicksPage: React.FC = () => {
 
   if (!favorites.length) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
         <h2 className="text-xl font-semibold text-gray-500 dark:text-gray-300">
           No favorites added yet.
         </h2>
@@ -69,11 +69,11 @@ const TopPicksPage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+    <div className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">
         Your Top Picks
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-8">
         {favorites.map((product) => (
           <div
             key={product.id}

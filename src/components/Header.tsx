@@ -50,7 +50,6 @@
 //     const timeoutId = setTimeout(() => {
 //       dispatch(setSearchQuery(watchedQuery || ""));
 //     }, 300);
-
 //     return () => clearTimeout(timeoutId);
 //   }, [watchedQuery, dispatch]);
 
@@ -94,7 +93,7 @@
 //               </h1>
 //             </Link>
 //             <button
-//               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+//               onClick={() => setIsMobileMenuOpen((open) => !open)}
 //               className="md:hidden p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
 //               aria-label="Toggle mobile menu"
 //             >
@@ -109,7 +108,6 @@
 //                 item.to === "/"
 //                   ? currentPath === "/"
 //                   : currentPath.startsWith(item.to);
-
 //               return (
 //                 <Link
 //                   key={item.to}
@@ -208,7 +206,7 @@
 
 //         {/* Mobile menu */}
 //         {isMobileMenuOpen && (
-//           <div className="md:hidden mt-2 text-lg space-y-2">
+//           <nav className="md:hidden mt-2 text-lg space-y-2">
 //             {navLinks.map((item) => (
 //               <Link
 //                 key={item.to}
@@ -219,7 +217,7 @@
 //                 {item.label}
 //               </Link>
 //             ))}
-//           </div>
+//           </nav>
 //         )}
 //       </div>
 //     </header>
@@ -324,7 +322,7 @@ const Header: React.FC = () => {
             </Link>
             <button
               onClick={() => setIsMobileMenuOpen((open) => !open)}
-              className="md:hidden p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="xl:hidden p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               aria-label="Toggle mobile menu"
             >
               <Menu className="h-5 w-5" />
@@ -332,7 +330,7 @@ const Header: React.FC = () => {
           </div>
 
           {/* Center navigation */}
-          <nav className="hidden md:flex items-center text-lg space-x-6">
+          <nav className="hidden xl:flex items-center text-lg space-x-6">
             {navLinks.map((item) => {
               const isActive =
                 item.to === "/"
@@ -357,7 +355,7 @@ const Header: React.FC = () => {
           {/* Search bar + theme/view/cart */}
           <div className="flex items-center space-x-2 lg:space-x-4">
             {isSearchablePage && (
-              <div className="hidden md:block max-w-lg w-full mx-2">
+              <div className="hidden xl:block max-w-lg w-full mx-2">
                 <form onSubmit={handleSubmit(onSearch)} className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
@@ -436,7 +434,7 @@ const Header: React.FC = () => {
 
         {/* Mobile menu */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden mt-2 text-lg space-y-2">
+          <nav className="xl:hidden mt-2 text-lg space-y-2">
             {navLinks.map((item) => (
               <Link
                 key={item.to}

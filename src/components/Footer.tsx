@@ -21,11 +21,12 @@
 //               Your trusted online shopping destination for quality products at
 //               unbeatable prices.
 //             </p>
-//             <div className="flex space-x-4">
+//             <div className="flex space-x-4" aria-label="Social media links">
 //               <a
 //                 href="https://www.facebook.com/"
 //                 target="_blank"
 //                 rel="noopener noreferrer"
+//                 aria-label="Shopify Facebook"
 //               >
 //                 <Facebook className="h-5 w-5 text-blue-400 hover:text-blue-600 transition-colors" />
 //               </a>
@@ -33,6 +34,7 @@
 //                 href="https://twitter.com/"
 //                 target="_blank"
 //                 rel="noopener noreferrer"
+//                 aria-label="Shopify Twitter"
 //               >
 //                 <Twitter className="h-5 w-5 text-blue-400 hover:text-blue-600 transition-colors" />
 //               </a>
@@ -40,6 +42,7 @@
 //                 href="https://www.instagram.com/"
 //                 target="_blank"
 //                 rel="noopener noreferrer"
+//                 aria-label="Shopify Instagram"
 //               >
 //                 <Instagram className="h-5 w-5 text-blue-400 hover:text-blue-600 transition-colors" />
 //               </a>
@@ -53,7 +56,7 @@
 //               <li>
 //                 <Link
 //                   to="/"
-//                   className="text-gray-400 dark:hover:text-white dark:text-gray-500 hover:text-white transition-colors"
+//                   className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
 //                 >
 //                   Home
 //                 </Link>
@@ -61,7 +64,7 @@
 //               <li>
 //                 <Link
 //                   to="/products"
-//                   className="text-gray-400 dark:hover:text-white dark:text-gray-500 hover:text-white transition-colors"
+//                   className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
 //                 >
 //                   All Products
 //                 </Link>
@@ -69,7 +72,7 @@
 //               <li>
 //                 <Link
 //                   to="/about"
-//                   className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+//                   className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
 //                 >
 //                   About Us
 //                 </Link>
@@ -77,7 +80,7 @@
 //               <li>
 //                 <Link
 //                   to="/contact"
-//                   className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+//                   className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
 //                 >
 //                   Contact
 //                 </Link>
@@ -85,7 +88,7 @@
 //               <li>
 //                 <Link
 //                   to="/faq"
-//                   className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+//                   className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
 //                 >
 //                   FAQ
 //                 </Link>
@@ -100,7 +103,7 @@
 //               <li>
 //                 <Link
 //                   to="/category/electronics"
-//                   className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+//                   className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
 //                 >
 //                   Electronics
 //                 </Link>
@@ -108,7 +111,7 @@
 //               <li>
 //                 <Link
 //                   to="/category/men's-clothing"
-//                   className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+//                   className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
 //                 >
 //                   Men's Clothing
 //                 </Link>
@@ -116,7 +119,7 @@
 //               <li>
 //                 <Link
 //                   to="/category/women's-clothing"
-//                   className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+//                   className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
 //                 >
 //                   Women's Clothing
 //                 </Link>
@@ -124,7 +127,7 @@
 //               <li>
 //                 <Link
 //                   to="/category/jewelery"
-//                   className="text-gray-400 dark:text-gray-500 dark:hover:text-white hover:text-white transition-colors"
+//                   className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-white transition-colors"
 //                 >
 //                   Jewelery
 //                 </Link>
@@ -159,6 +162,10 @@
 //             </div>
 //           </div>
 //         </div>
+//         {/* Footer bottom (optional copyright) */}
+//         <div className="mt-10 text-center text-xs text-gray-400 dark:text-gray-600">
+//           &copy; {new Date().getFullYear()} Shopify. All rights reserved.
+//         </div>
 //       </div>
 //     </footer>
 //   );
@@ -179,7 +186,7 @@ import { Link } from "react-router-dom";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-gray-900 dark:bg-gray-950 text-white">
+    <footer className="bg-gray-900 dark:bg-gray-950 text-white mt-auto">
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
