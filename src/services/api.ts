@@ -40,15 +40,6 @@ const backendApi: AxiosInstance = axios.create({
   },
 });
 
-// Attach JWT if present
-// api.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("authToken");
-//   if (token && config.headers) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
-
 // Error interceptor for Fake Store API (no auth needed)
 fakeStoreApi.interceptors.response.use(
   (response: AxiosResponse) => {
@@ -79,31 +70,6 @@ fakeStoreApi.interceptors.response.use(
     );
   }
 );
-
-// Normalize errors
-// api.interceptors.response.use(
-//   (response: AxiosResponse) => response,
-//   (error: AxiosError<unknown>) => {
-//     if (error.response) {
-//       const data = error.response.data;
-//       const message =
-//         typeof data === "object" && data !== null && "message" in data
-//           ? (data as { message: string }).message
-//           : error.message;
-//       throw new ApiError(message, error.response.status, data);
-//     }
-//     throw new ApiError(error.message);
-//   }
-// );
-
-// Auth interceptor for your backend API
-// backendApi.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("authToken");
-//   if (token && config.headers) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
 
 // ✅ CORRECT
 backendApi.interceptors.request.use((config) => {
@@ -248,100 +214,6 @@ export const productApi = {
     }
   },
 };
-
-// Payment and Order API using your backend
-// export const paymentApi = {
-//   createOrder: async (order: Order): Promise<any> => {
-//     try {
-//       console.log("💳 Creating order for payment...");
-//       const payload = {
-//         userId: 1, // Replace with actual user ID from authentication
-//         date: new Date().toISOString(),
-//         items: order.items.map((item) => ({
-//           productId: item.id,
-//           title: item.title,
-//           price: item.price,
-//           quantity: item.quantity,
-//         })),
-//         totalAmount: order.total,
-//         currency: "INR", // Add currency for Razorpay
-//       };
-
-//       const { data } = await backendApi.post("/api/orders", payload);
-//       console.log("✅ Order created successfully:", data);
-//       return data;
-//     } catch (error) {
-//       console.error("Error creating order:", error);
-//       throw error;
-//     }
-//   },
-
-//   initiatePayment: async (orderData: any): Promise<any> => {
-//     try {
-//       console.log("💰 Initiating Razorpay payment...");
-//       const { data } = await backendApi.post("/api/payment/create", orderData);
-//       console.log("✅ Payment initiated:", data);
-//       return data;
-//     } catch (error) {
-//       console.error("Error initiating payment:", error);
-//       throw error;
-//     }
-//   },
-
-//   verifyPayment: async (paymentData: any): Promise<any> => {
-//     try {
-//       console.log("🔐 Verifying payment...");
-//       const { data } = await backendApi.post(
-//         "/api/payment/verify",
-//         paymentData
-//       );
-//       console.log("✅ Payment verified:", data);
-//       return data;
-//     } catch (error) {
-//       console.error("Error verifying payment:", error);
-//       throw error;
-//     }
-//   },
-
-//   // Test backend connection
-//   testConnection: async (): Promise<boolean> => {
-//     try {
-//       await backendApi.get("/api/health");
-//       console.log("✅ Backend API connection successful");
-//       return true;
-//     } catch (error) {
-//       console.error("❌ Backend API connection failed:", error);
-//       return false;
-//     }
-//   },
-// };
-
-// // Combined health check for both APIs
-// export const testAllConnections = async () => {
-//   console.log("🔄 Testing all API connections...");
-
-//   const fakeStoreStatus = await productApi.testConnection();
-//   const backendStatus = await paymentApi.testConnection();
-
-//   console.log("📊 Connection Status:");
-//   console.log(
-//     `  • Fake Store API: ${fakeStoreStatus ? "✅ Online" : "❌ Offline"}`
-//   );
-//   console.log(`  • Backend API: ${backendStatus ? "✅ Online" : "❌ Offline"}`);
-
-//   return {
-//     fakeStore: fakeStoreStatus,
-//     backend: backendStatus,
-//     overall: fakeStoreStatus && backendStatus,
-//   };
-// };
-
-// // Legacy support - keeping the old createOrder function for backward compatibility
-// export const createOrder = paymentApi.createOrder;
-
-// // Export the APIs
-// export { fakeStoreApi, backendApi };
-// export default fakeStoreApi;
 
 // Payment API (using your backend)
 export const paymentApi = {
