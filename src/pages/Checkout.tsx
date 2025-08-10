@@ -486,6 +486,189 @@ const Checkout: React.FC = () => {
   // Store token in component state instead of localStorage
   const [authToken, setAuthToken] = useState("your_token_here"); // Replace with your token management
 
+  // const onSubmit = async (e: FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError("");
+
+  //   if (cartItems.length === 0) {
+  //     setError("Your cart is empty.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   if (total <= 0 || isNaN(total)) {
+  //     setError("Invalid total amount.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   // Check if Razorpay is loaded
+  //   if (!window.Razorpay) {
+  //     setError("Payment system not loaded. Please refresh and try again.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   // Use state-based token instead of localStorage
+  //   const headers: Record<string, string> = {
+  //     "Content-Type": "application/json",
+  //   };
+
+  //   if (authToken) {
+  //     headers.Authorization = `Bearer ${authToken}`;
+  //   }
+
+  //   const requestConfig = {
+  //     method: "POST",
+  //     headers,
+  //     credentials: "include" as RequestCredentials, // For cookies
+  //   };
+
+  //   try {
+  //     // Prepare order items for ecommerce checkout
+  //     const orderItems = cartItems.map((item) => ({
+  //       productId: item.id,
+  //       productName: item.name || item.title,
+  //       quantity: item.quantity,
+  //       price: item.price,
+  //     }));
+
+  //     // 1) Create order with cart items
+  //     const orderResponse = await fetch(
+  //       // `${import.meta.env.VITE_BACKEND_URL}/api/payment/create-order`,
+  //       "http://localhost:5000/api/payment/create-order",
+  //       {
+  //         ...requestConfig,
+  //         body: JSON.stringify({
+  //           amount: Math.round(total),
+  //           currency: "INR",
+  //           items: orderItems,
+  //           shipping: shipping,
+  //           receipt: `order_${Date.now()}`,
+  //         }),
+  //       }
+  //     );
+
+  //     if (!orderResponse.ok) {
+  //       if (orderResponse.status === 401) {
+  //         setError("Please log in to continue.");
+  //         setLoading(false);
+  //         return;
+  //       }
+  //       throw new Error(`HTTP ${orderResponse.status}`);
+  //     }
+
+  //     const orderData = await orderResponse.json();
+
+  //     const options: RazorpayOptions = {
+  //       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+  //       amount: orderData.amount,
+  //       currency: orderData.currency || "INR",
+  //       name: "Your Store",
+  //       description: "Product Purchase",
+  //       order_id: orderData.id,
+  //       notes: {
+  //         orderId: orderData.id,
+  //         itemCount: String(cartItems.length),
+  //       },
+  //       prefill: {
+  //         name: shipping.name || "Customer",
+  //         email: shipping.email || "customer@example.com",
+  //         contact: shipping.phone || "",
+  //       },
+  //       theme: { color: "#3399cc" },
+
+  //       // 2) Payment success handler
+  //       handler: async (response: {
+  //         razorpay_payment_id: string;
+  //         razorpay_order_id: string;
+  //         razorpay_signature: string;
+  //       }) => {
+  //         try {
+  //           // Verify payment
+  //           const verifyResponse = await fetch(
+  //             `${import.meta.env.VITE_BACKEND_URL}/payment/verify`,
+  //             {
+  //               ...requestConfig,
+  //               body: JSON.stringify({
+  //                 razorpay_payment_id: response.razorpay_payment_id,
+  //                 razorpay_order_id: response.razorpay_order_id,
+  //                 razorpay_signature: response.razorpay_signature,
+  //               }),
+  //             }
+  //           );
+
+  //           if (!verifyResponse.ok) {
+  //             throw new Error(`Verification failed: ${verifyResponse.status}`);
+  //           }
+
+  //           const verifyResult = await verifyResponse.json();
+
+  //           if (verifyResult?.success) {
+  //             // Record payment with order details
+  //             const recordResponse = await fetch(
+  //               `${import.meta.env.VITE_API_BASE_URL}/payment`,
+  //               {
+  //                 ...requestConfig,
+  //                 body: JSON.stringify({
+  //                   orderId: orderData.id,
+  //                   paymentId: response.razorpay_payment_id,
+  //                   amount: Math.round(total),
+  //                   items: orderItems,
+  //                   shipping: shipping,
+  //                   status: "completed",
+  //                 }),
+  //               }
+  //             );
+
+  //             if (recordResponse.ok) {
+  //               // Clear cart and navigate to success page
+  //               // setCartItems([]); // Uncomment if you have this function
+  //               navigate("/success");
+  //             } else {
+  //               setError("Payment recorded but order processing failed.");
+  //             }
+  //           } else {
+  //             setError("Payment verification failed.");
+  //           }
+  //         } catch (err: unknown) {
+  //           console.error("Payment verification error:", err);
+  //           if (err instanceof Error && err.message.includes("401")) {
+  //             setError("Session expired. Please log in again.");
+  //           } else {
+  //             setError(
+  //               "Payment verification failed. Please contact support if amount was deducted."
+  //             );
+  //           }
+  //         } finally {
+  //           setLoading(false);
+  //         }
+  //       },
+
+  //       modal: {
+  //         ondismiss: () => {
+  //           setLoading(false);
+  //           setError("Payment cancelled.");
+  //         },
+  //       },
+  //     };
+
+  //     // Open Razorpay payment modal
+  //     const razorpayInstance = new window.Razorpay(options);
+  //     razorpayInstance.open();
+  //   } catch (err: unknown) {
+  //     console.error("Payment initiation error:", err);
+
+  //     if (err instanceof Error && err.message.includes("401")) {
+  //       setError("Please log in to continue.");
+  //     } else {
+  //       setError("Payment failed. Please try again.");
+  //     }
+  //     setLoading(false);
+  //   }
+  // };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -534,41 +717,89 @@ const Checkout: React.FC = () => {
         price: item.price,
       }));
 
+      // ✅ Debug: Log all the data being sent
+      const requestPayload = {
+        amount: Math.round(total),
+        currency: "INR",
+        items: orderItems,
+        shipping: shipping,
+        receipt: `order_${Date.now()}`,
+      };
+
+      console.log("🔍 Frontend Debug Info:");
+      console.log("Total amount:", total);
+      console.log("Rounded amount:", Math.round(total));
+      console.log("Cart items:", cartItems);
+      console.log("Order items:", orderItems);
+      console.log("Shipping info:", shipping);
+      console.log(
+        "Complete request payload:",
+        JSON.stringify(requestPayload, null, 2)
+      );
+
       // 1) Create order with cart items
       const orderResponse = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/payment/create-order`,
+        "http://localhost:5000/api/payment/create-order",
         {
           ...requestConfig,
-          body: JSON.stringify({
-            amount: Math.round(total),
-            currency: "INR",
-            items: orderItems,
-            shipping: shipping,
-            receipt: `order_${Date.now()}`,
-          }),
+          body: JSON.stringify(requestPayload),
         }
       );
 
+      console.log("📡 Response status:", orderResponse.status);
+      console.log(
+        "📡 Response headers:",
+        Object.fromEntries(orderResponse.headers.entries())
+      );
+
+      // ✅ Get response text first to debug what's being returned
+      const responseText = await orderResponse.text();
+      console.log("📡 Raw response:", responseText);
+
       if (!orderResponse.ok) {
+        // ✅ Try to parse error response
+        let errorData;
+        try {
+          errorData = JSON.parse(responseText);
+          console.error("❌ Server error response:", errorData);
+          setError(
+            errorData.error ||
+              errorData.message ||
+              `HTTP ${orderResponse.status}`
+          );
+        } catch (parseError) {
+          console.error("❌ Could not parse error response:", responseText);
+          setError(`HTTP ${orderResponse.status}: ${responseText}`);
+        }
+
         if (orderResponse.status === 401) {
           setError("Please log in to continue.");
-          setLoading(false);
-          return;
         }
-        throw new Error(`HTTP ${orderResponse.status}`);
+        setLoading(false);
+        return;
       }
 
-      const orderData = await orderResponse.json();
+      // ✅ Parse the successful response
+      const orderData = JSON.parse(responseText);
+      console.log("✅ Order created successfully:", orderData);
+
+      // ✅ Debug: Check the structure of orderData
+      console.log("🔍 Order data structure:");
+      console.log("- orderData.id:", orderData.id);
+      console.log("- orderData.orderId:", orderData.orderId);
+      console.log("- orderData.order?.id:", orderData.order?.id);
+      console.log("- orderData.amount:", orderData.amount);
+      console.log("- orderData.order?.amount:", orderData.order?.amount);
 
       const options: RazorpayOptions = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: orderData.amount,
-        currency: orderData.currency || "INR",
+        amount: orderData.order?.amount || orderData.amount,
+        currency: orderData.order?.currency || orderData.currency || "INR",
         name: "Your Store",
         description: "Product Purchase",
-        order_id: orderData.id,
+        order_id: orderData.order?.id || orderData.orderId || orderData.id,
         notes: {
-          orderId: orderData.id,
+          orderId: orderData.order?.id || orderData.orderId || orderData.id,
           itemCount: String(cartItems.length),
         },
         prefill: {
@@ -585,9 +816,11 @@ const Checkout: React.FC = () => {
           razorpay_signature: string;
         }) => {
           try {
+            console.log("💰 Payment successful, verifying...", response);
+
             // Verify payment
             const verifyResponse = await fetch(
-              `${import.meta.env.VITE_BACKEND_URL}/payment/verify`,
+              "http://localhost:5000/api/payment/verify", // ✅ Fixed URL
               {
                 ...requestConfig,
                 body: JSON.stringify({
@@ -603,31 +836,39 @@ const Checkout: React.FC = () => {
             }
 
             const verifyResult = await verifyResponse.json();
+            console.log("🔐 Verification result:", verifyResult);
 
             if (verifyResult?.success) {
-              // Record payment with order details
-              const recordResponse = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL}/payment`,
-                {
-                  ...requestConfig,
-                  body: JSON.stringify({
-                    orderId: orderData.id,
-                    paymentId: response.razorpay_payment_id,
-                    amount: Math.round(total),
-                    items: orderItems,
-                    shipping: shipping,
-                    status: "completed",
-                  }),
-                }
-              );
+              // Record payment with order details (if you have this endpoint)
+              if (import.meta.env.VITE_API_BASE_URL) {
+                const recordResponse = await fetch(
+                  `${import.meta.env.VITE_API_BASE_URL}/payment`,
+                  {
+                    ...requestConfig,
+                    body: JSON.stringify({
+                      orderId:
+                        orderData.order?.id ||
+                        orderData.orderId ||
+                        orderData.id,
+                      paymentId: response.razorpay_payment_id,
+                      amount: Math.round(total),
+                      items: orderItems,
+                      shipping: shipping,
+                      status: "completed",
+                    }),
+                  }
+                );
 
-              if (recordResponse.ok) {
-                // Clear cart and navigate to success page
-                // setCartItems([]); // Uncomment if you have this function
-                navigate("/success");
-              } else {
-                setError("Payment recorded but order processing failed.");
+                if (!recordResponse.ok) {
+                  console.warn(
+                    "⚠️ Payment recorded but order processing failed"
+                  );
+                }
               }
+
+              // Clear cart and navigate to success page
+              console.log("✅ Payment complete, navigating to success page");
+              navigate("/success");
             } else {
               setError("Payment verification failed.");
             }
@@ -652,6 +893,8 @@ const Checkout: React.FC = () => {
           },
         },
       };
+
+      console.log("🚀 Opening Razorpay with options:", options);
 
       // Open Razorpay payment modal
       const razorpayInstance = new window.Razorpay(options);
@@ -714,7 +957,7 @@ const Checkout: React.FC = () => {
           <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-8">
             Order Summary
           </h3>
-          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+          <ul className="divide-y text-black dark:text-white">
             {cartItems.map((i) => (
               <li key={i.product.id} className="py-3 flex justify-between">
                 <span>
