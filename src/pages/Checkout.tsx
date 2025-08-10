@@ -113,6 +113,7 @@ const Checkout: React.FC = () => {
       "Content-Type": "application/json",
     };
 
+    
     if (authToken) {
       headers.Authorization = `Bearer ${authToken}`;
     }

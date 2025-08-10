@@ -97,12 +97,21 @@ fakeStoreApi.interceptors.response.use(
 // );
 
 // Auth interceptor for your backend API
+// backendApi.interceptors.request.use((config) => {
+//   const token = localStorage.getItem("authToken");
+//   if (token && config.headers) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
+
+// ✅ CORRECT
 backendApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
   if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+    // ✅ Use 'token'
+    config.headers.Authorization = `Bearer ${token}`; // ✅ Use 'token'
   }
-  return config;
 });
 
 // Error interceptor for your backend API
